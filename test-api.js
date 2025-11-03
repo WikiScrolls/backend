@@ -7,7 +7,7 @@
  * Make sure your server is running on http://localhost:3000
  */
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'https://backend-production-cc13.up.railway.app';
 
 // Color codes for console output
 const colors = {

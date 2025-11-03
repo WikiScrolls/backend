@@ -70,5 +70,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Start the application
-CMD ["pnpm", "start"]
+# Start the application (with automatic database migration)
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node dist/index.js"]

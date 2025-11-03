@@ -16,6 +16,10 @@ yarn.lock
 logs/
 *.log
 
+# Test coverage
+coverage/
+*.lcov
+
 # OS
 .DS_Store
 Thumbs.db
