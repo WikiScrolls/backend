@@ -11,11 +11,22 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 COPY pnpm-workspace.yaml ./
 
+# Copy Prisma schema (needed for prisma generate during build)
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+
 # ===== Dependencies stage =====
 FROM base AS dependencies
 
+# Copy prisma files (needed before install to avoid postinstall errors)
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+
 # Install all dependencies (including dev dependencies for build)
 RUN pnpm install --frozen-lockfile
+
+# Generate Prisma Client after dependencies are installed
+RUN npx prisma generate
 
 # ===== Build stage =====
 FROM base AS build
@@ -35,13 +46,16 @@ RUN pnpm build
 # ===== Production stage =====
 FROM base AS production
 
+# Copy prisma files for production (needed for runtime)
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+
 # Install only production dependencies
 RUN pnpm install --frozen-lockfile --prod
 
 # Copy built application from build stage
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/generated ./generated
-COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/package.json ./package.json
 
 # Create logs directory
