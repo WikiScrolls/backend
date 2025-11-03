@@ -5,12 +5,33 @@ import { logger } from '../config/logger';
 export class UserService {
   async getAllUsers() {
     logger.info('Fetching all users');
-    return await prisma.user.findMany();
+    return await prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        isAdmin: true,
+        createdAt: true,
+        lastLoginAt: true,
+        profile: true,
+      },
+    });
   }
 
-  async getUserById(id: number) {
+  async getUserById(id: string) {
     logger.info(`Fetching user with id: ${id}`);
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await prisma.user.findUnique({ 
+      where: { id },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        isAdmin: true,
+        createdAt: true,
+        lastLoginAt: true,
+        profile: true,
+      },
+    });
     
     if (!user) {
       throw new NotFoundError(`User with id ${id} not found`);
@@ -19,12 +40,31 @@ export class UserService {
     return user;
   }
 
-  async createUser(data: { email: string; name?: string }) {
-    logger.info('Creating new user', { email: data.email });
-    return await prisma.user.create({ data });
+  async createUser(data: { 
+    username: string; 
+    email: string; 
+    passwordHash: string;
+    isAdmin?: boolean;
+  }) {
+    logger.info('Creating new user', { username: data.username, email: data.email });
+    return await prisma.user.create({ 
+      data,
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        isAdmin: true,
+        createdAt: true,
+      },
+    });
   }
 
-  async updateUser(id: number, data: { email?: string; name?: string }) {
+  async updateUser(id: string, data: { 
+    username?: string; 
+    email?: string;
+    passwordHash?: string;
+    isAdmin?: boolean;
+  }) {
     logger.info(`Updating user with id: ${id}`);
     const user = await prisma.user.findUnique({ where: { id } });
     
@@ -35,10 +75,18 @@ export class UserService {
     return await prisma.user.update({
       where: { id },
       data,
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        isAdmin: true,
+        createdAt: true,
+        lastLoginAt: true,
+      },
     });
   }
 
-  async deleteUser(id: number) {
+  async deleteUser(id: string) {
     logger.info(`Deleting user with id: ${id}`);
     const user = await prisma.user.findUnique({ where: { id } });
     

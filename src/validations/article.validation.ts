@@ -1,0 +1,161 @@
+import { body, param, query } from 'express-validator';
+
+/**
+ * Validation for creating an article
+ */
+export const validateCreateArticle = [
+  body('title')
+    .notEmpty()
+    .withMessage('Title is required')
+    .isString()
+    .withMessage('Title must be a string')
+    .isLength({ min: 1, max: 500 })
+    .withMessage('Title must be between 1 and 500 characters')
+    .trim(),
+  
+  body('wikipediaUrl')
+    .notEmpty()
+    .withMessage('Wikipedia URL is required')
+    .isURL()
+    .withMessage('Must be a valid URL')
+    .trim(),
+  
+  body('aiSummary')
+    .notEmpty()
+    .withMessage('AI summary is required')
+    .isString()
+    .withMessage('AI summary must be a string')
+    .trim(),
+  
+  body('audioUrl')
+    .optional()
+    .isURL()
+    .withMessage('Must be a valid URL')
+    .trim(),
+  
+  body('tags')
+    .optional()
+    .isArray()
+    .withMessage('Tags must be an array'),
+  
+  body('tags.*')
+    .optional()
+    .isString()
+    .withMessage('Each tag must be a string')
+    .trim(),
+  
+  body('publishedDate')
+    .notEmpty()
+    .withMessage('Published date is required')
+    .isISO8601()
+    .withMessage('Published date must be a valid ISO 8601 date'),
+  
+  body('categoryId')
+    .notEmpty()
+    .withMessage('Category ID is required')
+    .isUUID()
+    .withMessage('Category ID must be a valid UUID'),
+];
+
+/**
+ * Validation for updating an article
+ */
+export const validateUpdateArticle = [
+  param('id')
+    .isUUID()
+    .withMessage('Article ID must be a valid UUID'),
+  
+  body('title')
+    .optional()
+    .isString()
+    .withMessage('Title must be a string')
+    .isLength({ min: 1, max: 500 })
+    .withMessage('Title must be between 1 and 500 characters')
+    .trim(),
+  
+  body('wikipediaUrl')
+    .optional()
+    .isURL()
+    .withMessage('Must be a valid URL')
+    .trim(),
+  
+  body('aiSummary')
+    .optional()
+    .isString()
+    .withMessage('AI summary must be a string')
+    .trim(),
+  
+  body('audioUrl')
+    .optional()
+    .isURL()
+    .withMessage('Must be a valid URL')
+    .trim(),
+  
+  body('tags')
+    .optional()
+    .isArray()
+    .withMessage('Tags must be an array'),
+  
+  body('publishedDate')
+    .optional()
+    .isISO8601()
+    .withMessage('Published date must be a valid ISO 8601 date'),
+  
+  body('categoryId')
+    .optional()
+    .isUUID()
+    .withMessage('Category ID must be a valid UUID'),
+  
+  body('isActive')
+    .optional()
+    .isBoolean()
+    .withMessage('isActive must be a boolean'),
+  
+  body('isProcessed')
+    .optional()
+    .isBoolean()
+    .withMessage('isProcessed must be a boolean'),
+];
+
+/**
+ * Validation for getting an article by ID
+ */
+export const validateGetArticle = [
+  param('id')
+    .isUUID()
+    .withMessage('Article ID must be a valid UUID'),
+];
+
+/**
+ * Validation for deleting an article
+ */
+export const validateDeleteArticle = [
+  param('id')
+    .isUUID()
+    .withMessage('Article ID must be a valid UUID'),
+];
+
+/**
+ * Validation for listing articles with pagination and filtering
+ */
+export const validateListArticles = [
+  query('page')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Page must be a positive integer'),
+  
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage('Limit must be between 1 and 100'),
+  
+  query('sortBy')
+    .optional()
+    .isIn(['createdAt', 'title', 'publishedDate', 'viewCount', 'likeCount'])
+    .withMessage('Sort by must be one of: createdAt, title, publishedDate, viewCount, likeCount'),
+  
+  query('sortOrder')
+    .optional()
+    .isIn(['asc', 'desc'])
+    .withMessage("Sort order must be either 'asc' or 'desc'"),
+];

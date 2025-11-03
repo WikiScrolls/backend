@@ -1,11 +1,8 @@
-// This is your Prisma schema file,
+// This is your Prisma schema file.
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
@@ -14,10 +11,132 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//##################################
+// User and Profile Models
+//##################################
+
+// Represents the core authentication entity.
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String    @id @default(uuid()) @db.Uuid
+  username     String    @unique
+  email        String    @unique
+  passwordHash String
+  isAdmin      Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+
+  // --- Relations ---
+  // One-to-one relation with UserProfile
+  profile UserProfile?
+
+  // One-to-one relation with the user's personalized Feed
+  feed Feed?
+
+  // One-to-many relation with all interactions by this user
+  interactions UserInteraction[]
+}
+
+// Holds public-facing data, separate from auth.
+model UserProfile {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @unique @db.Uuid // This @unique makes it a one-to-one relation
+  displayName String?
+  bio         String?
+  interests   String[] // Maps to List<String> from your UML
+  updatedAt   DateTime @updatedAt
+
+  // --- Relations ---
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+//##################################
+// Content Models
+//##################################
+
+// Represents a single Wikipedia article, processed by your AI.
+model Article {
+  id            String   @id @default(uuid()) @db.Uuid
+  title         String
+  wikipediaUrl  String   @unique // Ensures you don't process the same article twice
+  aiSummary     String   @db.Text // Use Text for potentially long summaries
+  audioUrl      String?
+  tags          String[]
+  publishedDate DateTime // The original article's publish date
+  createdAt     DateTime @default(now())
+  isActive      Boolean  @default(true)
+  isProcessed   Boolean  @default(false) // Flag for your processing queue
+
+  // Denormalized counts for fast read access, as seen in your UML
+  viewCount Int @default(0)
+  likeCount Int @default(0)
+  saveCount Int @default(0) // Added 'save' to match the SAVE InteractionType
+
+  // --- Relations ---
+  categoryId String   @db.Uuid
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  // One-to-many relation with all interactions on this article
+  interactions UserInteraction[]
+
+  @@index([categoryId])
+  @@index([isActive, isProcessed]) // For quickly finding articles to process or display
+}
+
+// Organizes articles into categories.
+model Category {
+  id           String    @id @default(uuid()) @db.Uuid
+  name         String    @unique
+  description  String?
+  color        String?
+  articleCount Int       @default(0) // You would increment this via a transaction
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // --- Relations ---
+  // One-to-many relation with all Articles in this category
+  articles Article[]
+}
+
+//##################################
+// Interaction and Recommendation
+//##################################
+
+// Enum for the types of interactions a user can perform.
+enum InteractionType {
+  LIKE
+  VIEW
+  SAVE
+}
+
+// A log of every action a user takes on an article.
+// This is the "brain" for your recommendation engine.
+model UserInteraction {
+  id              String          @id @default(uuid()) @db.Uuid
+  userId          String          @db.Uuid
+  articleId       String          @db.Uuid
+  interactionType InteractionType
+  createdAt       DateTime        @default(now())
+
+  // --- Relations ---
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  // This ensures a user can only LIKE or SAVE an article *once*.
+  // They can VIEW it multiple times, so a 'VIEW' row is created each time.
+  @@unique([userId, articleId, interactionType])
+  @@index([userId])
+  @@index([articleId])
+}
+
+// Stores the pre-generated feed for a user.
+// Your RecommendationEngine's job is to populate this table.
+model Feed {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @unique @db.Uuid // Each user gets one feed
+  articleIds String[] @db.Uuid // An ordered list of article IDs to show
+  currentPosition Int    @default(0) // Tracks how far the user has scrolled
+  updatedAt DateTime @updatedAt // When the feed was last generated
+
+  // --- Relations ---
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
