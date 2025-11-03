@@ -32,16 +32,14 @@ RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma gene
 # ===== Build stage =====
 FROM base AS build
 
-# Copy dependencies from previous stage
+# Copy dependencies from previous stage (includes generated Prisma Client)
 COPY --from=dependencies /app/node_modules ./node_modules
+COPY --from=dependencies /app/generated ./generated
 
 # Copy source code and config files
 COPY . .
 
-# Generate Prisma Client
-RUN pnpm prisma:generate
-
-# Build TypeScript
+# Build TypeScript (no need to regenerate Prisma Client, already done in dependencies stage)
 RUN pnpm build
 
 # ===== Production stage =====
