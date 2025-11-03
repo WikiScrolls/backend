@@ -26,7 +26,8 @@ COPY prisma.config.ts ./
 RUN pnpm install --frozen-lockfile
 
 # Generate Prisma Client after dependencies are installed
-RUN npx prisma generate
+# Use a dummy DATABASE_URL for build time (not used, just satisfies validation)
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma generate
 
 # ===== Build stage =====
 FROM base AS build
