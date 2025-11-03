@@ -8,7 +8,13 @@ import morganMiddleware from './middleware/morganMiddleware';
 import { apiLimiter } from './middleware/rateLimiter';
 import { errorHandler } from './middleware/errorHandler';
 import { notFound } from './middleware/notFound';
+import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
+import categoryRoutes from './routes/category.routes';
+import articleRoutes from './routes/article.routes';
+import userProfileRoutes from './routes/userProfile.routes';
+import interactionRoutes from './routes/interaction.routes';
+import feedRoutes from './routes/feed.routes';
 
 // Load environment variables
 config();
@@ -32,7 +38,13 @@ app.get('/health', (req, res) => {
 });
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/articles', articleRoutes);
+app.use('/api/profiles', userProfileRoutes);
+app.use('/api/interactions', interactionRoutes);
+app.use('/api/feeds', feedRoutes);
 
 // 404 handler
 app.use(notFound);

@@ -30,7 +30,7 @@ export const validateCreateArticle = [
   body('audioUrl')
     .optional()
     .isURL()
-    .withMessage('Must be a valid URL')
+    .withMessage('Audio URL must be a valid URL')
     .trim(),
   
   body('tags')
@@ -88,13 +88,19 @@ export const validateUpdateArticle = [
   body('audioUrl')
     .optional()
     .isURL()
-    .withMessage('Must be a valid URL')
+    .withMessage('Audio URL must be a valid URL')
     .trim(),
   
   body('tags')
     .optional()
     .isArray()
     .withMessage('Tags must be an array'),
+  
+  body('tags.*')
+    .optional()
+    .isString()
+    .withMessage('Each tag must be a string')
+    .trim(),
   
   body('publishedDate')
     .optional()
@@ -158,4 +164,13 @@ export const validateListArticles = [
     .optional()
     .isIn(['asc', 'desc'])
     .withMessage("Sort order must be either 'asc' or 'desc'"),
+];
+
+/**
+ * Validation for incrementing view count
+ */
+export const validateIncrementViewCount = [
+  param('id')
+    .isUUID()
+    .withMessage('Article ID must be a valid UUID'),
 ];

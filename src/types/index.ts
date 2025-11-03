@@ -75,3 +75,8 @@ export interface ValidationError {
   field: string;
   message: string;
 }
+
+/**
+ * Interaction type enum
+ */
+export type InteractionType = 'LIKE' | 'VIEW' | 'SAVE';
