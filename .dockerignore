@@ -1,0 +1,44 @@
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Development
+.env
+.env.local
+.env.development
+*.env.example
+
+# Build
+dist
+*.tsbuildinfo
+
+# Logs
+logs
+*.log
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+
+# Test files
+test-api.js
+TEST_API.md
+test-connection.js
+
+# Misc
+.DS_Store
+Thumbs.db
