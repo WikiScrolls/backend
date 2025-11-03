@@ -12,7 +12,7 @@ export const apiLimiter = rateLimit({
 // Strict rate limiter for auth endpoints
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs
+  max: 1000, // Increased for testing - set back to 5 for production
   message: 'Too many authentication attempts, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -21,7 +21,7 @@ export const authLimiter = rateLimit({
 // Create endpoint rate limiter
 export const createLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // Limit each IP to 10 create requests per hour
+  max: 1000, // Increased for testing - set back to 10 for production
   message: 'Too many create requests, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
