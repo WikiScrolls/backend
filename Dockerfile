@@ -8,7 +8,9 @@ RUN npm install -g pnpm@10.19.0
 WORKDIR /app
 
 # Copy package files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json ./
+COPY pnpm-lock.yaml* ./
+COPY pnpm-workspace.yaml* ./
 
 # ===== Dependencies stage =====
 FROM base AS dependencies

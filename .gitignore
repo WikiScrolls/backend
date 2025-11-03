@@ -5,9 +5,8 @@ dist/
 .env
 .env.local
 
-# Package managers
+# Package managers (keep pnpm-lock.yaml for reproducible builds)
 package-lock.json
-pnpm-lock.yaml
 yarn.lock
 
 # Prisma
