@@ -172,7 +172,7 @@ Current settings in `src/config/database.ts`:
 
 ## Monitoring
 - Use Easypanel's built-in monitoring
-- Health check: `GET /api/health`
+- Health check: `GET /health`
 - Check logs for errors
 - Monitor response times and error rates
 
