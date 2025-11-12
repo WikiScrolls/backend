@@ -13,14 +13,12 @@ COPY pnpm-workspace.yaml ./
 
 # Copy Prisma schema (needed for prisma generate during build)
 COPY prisma ./prisma
-COPY prisma.config.ts ./
 
 # ===== Dependencies stage =====
 FROM base AS dependencies
 
 # Copy prisma files (needed before install to avoid postinstall errors)
 COPY prisma ./prisma
-COPY prisma.config.ts ./
 
 # Install all dependencies (including dev dependencies for build)
 RUN pnpm install --frozen-lockfile
@@ -47,7 +45,6 @@ FROM base AS production
 
 # Copy prisma files for production (needed for runtime)
 COPY prisma ./prisma
-COPY prisma.config.ts ./
 
 # Install only production dependencies
 RUN pnpm install --frozen-lockfile --prod
