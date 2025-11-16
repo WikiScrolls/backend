@@ -32,6 +32,12 @@ export const validateCreateProfile = [
     .isLength({ min: 1, max: 50 })
     .withMessage('Each interest must be between 1 and 50 characters')
     .trim(),
+  
+  body('avatarUrl')
+    .optional()
+    .isURL()
+    .withMessage('Avatar URL must be a valid URL')
+    .trim(),
 ];
 
 /**
@@ -65,6 +71,12 @@ export const validateUpdateProfile = [
     .withMessage('Each interest must be a string')
     .isLength({ min: 1, max: 50 })
     .withMessage('Each interest must be between 1 and 50 characters')
+    .trim(),
+  
+  body('avatarUrl')
+    .optional()
+    .isURL()
+    .withMessage('Avatar URL must be a valid URL')
     .trim(),
 ];
 
@@ -112,6 +124,12 @@ export const validateUpdateProfileByUserId = [
     .withMessage('Each interest must be a string')
     .isLength({ min: 1, max: 50 })
     .withMessage('Each interest must be between 1 and 50 characters')
+    .trim(),
+  
+  body('avatarUrl')
+    .optional()
+    .isURL()
+    .withMessage('Avatar URL must be a valid URL')
     .trim(),
 ];
 

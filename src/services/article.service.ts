@@ -61,6 +61,7 @@ export class ArticleService {
     wikipediaUrl: string;
     aiSummary: string;
     audioUrl?: string;
+    imageUrl?: string;
     tags?: string[];
     publishedDate: Date;
     categoryId: string;
@@ -83,6 +84,7 @@ export class ArticleService {
     wikipediaUrl: string;
     aiSummary: string;
     audioUrl: string | null;
+    imageUrl: string | null;
     tags: string[];
     publishedDate: Date;
     categoryId: string;

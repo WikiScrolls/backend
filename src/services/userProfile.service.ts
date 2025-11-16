@@ -52,6 +52,7 @@ export class UserProfileService {
     userId: string;
     displayName?: string;
     bio?: string;
+    avatarUrl?: string;
     interests?: string[];
   }) {
     logger.info('Creating user profile', { userId: data.userId });
@@ -94,6 +95,7 @@ export class UserProfileService {
     data: {
       displayName?: string;
       bio?: string;
+      avatarUrl?: string;
       interests?: string[];
     },
     requestingUserId: string,

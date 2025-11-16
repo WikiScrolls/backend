@@ -42,6 +42,7 @@ model UserProfile {
   userId      String   @unique @db.Uuid // This @unique makes it a one-to-one relation
   displayName String?
   bio         String?
+  avatarUrl   String? // User's profile picture from Cloudinary
   interests   String[] // Maps to List<String> from your UML
   updatedAt   DateTime @updatedAt
 
@@ -58,6 +59,7 @@ model Article {
   id            String   @id @default(uuid()) @db.Uuid
   title         String
   wikipediaUrl  String   @unique // Ensures you don't process the same article twice
+  imageUrl      String? // Article thumbnail/cover image from Cloudinary
   aiSummary     String   @db.Text // Use Text for potentially long summaries
   audioUrl      String?
   tags          String[]

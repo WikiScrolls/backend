@@ -33,6 +33,12 @@ export const validateCreateArticle = [
     .withMessage('Audio URL must be a valid URL')
     .trim(),
   
+  body('imageUrl')
+    .optional()
+    .isURL()
+    .withMessage('Image URL must be a valid URL')
+    .trim(),
+  
   body('tags')
     .optional()
     .isArray()
@@ -81,22 +87,26 @@ export const validateUpdateArticle = [
   
   body('aiSummary')
     .optional()
-    .isString()
+  .isString()
     .withMessage('AI summary must be a string')
     .trim(),
-  
+
   body('audioUrl')
     .optional()
     .isURL()
     .withMessage('Audio URL must be a valid URL')
     .trim(),
-  
+
+  body('imageUrl')
+    .optional()
+    .isURL()
+    .withMessage('Image URL must be a valid URL')
+    .trim(),
+
   body('tags')
     .optional()
     .isArray()
-    .withMessage('Tags must be an array'),
-  
-  body('tags.*')
+    .withMessage('Tags must be an array'),  body('tags.*')
     .optional()
     .isString()
     .withMessage('Each tag must be a string')
