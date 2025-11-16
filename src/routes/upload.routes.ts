@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { UploadController } from '../controllers/upload.controller';
-import { uploadSingle } from '../middleware/upload';
+import { uploadSingle, uploadAudioSingle } from '../middleware/upload';
 import { authenticate, isAdmin } from '../middleware/auth';
 import { createLimiter } from '../middleware/rateLimiter';
 import { param } from 'express-validator';
@@ -50,6 +50,29 @@ router.delete(
   param('articleId').isUUID().withMessage('Article ID must be a valid UUID'),
   handleValidationErrors,
   uploadController.deleteArticleImage
+);
+
+/**
+ * Article Audio Routes (Admin only)
+ */
+// Upload audio for an article
+router.post(
+  '/audio/:articleId',
+  isAdmin,
+  createLimiter,
+  param('articleId').isUUID().withMessage('Article ID must be a valid UUID'),
+  handleValidationErrors,
+  uploadAudioSingle,
+  uploadController.uploadArticleAudio
+);
+
+// Delete audio from an article
+router.delete(
+  '/audio/:articleId',
+  isAdmin,
+  param('articleId').isUUID().withMessage('Article ID must be a valid UUID'),
+  handleValidationErrors,
+  uploadController.deleteArticleAudio
 );
 
 export default router;
