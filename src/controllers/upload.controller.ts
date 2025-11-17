@@ -3,7 +3,7 @@ import { asyncHandler } from '../middleware/errorHandler';
 import { AuthRequest } from '../types';
 import { sendSuccess } from '../utils/response';
 import { BadRequestError, NotFoundError } from '../utils/errors';
-import { uploadImage, deleteImage, extractPublicId } from '../utils/cloudinary';
+import { uploadImage, uploadAudio, deleteImage, deleteAudio, extractPublicId } from '../utils/cloudinary';
 import prisma from '../config/database';
 import { logger } from '../config/logger';
 
@@ -216,5 +216,108 @@ export class UploadController {
     });
 
     sendSuccess(res, 'Article image deleted successfully', updatedArticle);
+  });
+
+  /**
+   * Upload audio for an article (admin only)
+   */
+  uploadArticleAudio = asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.file) {
+      throw new BadRequestError('No audio file provided');
+    }
+
+    const { articleId } = req.params;
+
+    // Check if article exists
+    const article = await prisma.article.findUnique({
+      where: { id: articleId },
+    });
+
+    if (!article) {
+      throw new NotFoundError('Article not found');
+    }
+
+    // Delete old audio from Cloudinary if it exists
+    if (article.audioUrl) {
+      const oldPublicId = extractPublicId(article.audioUrl);
+      if (oldPublicId) {
+        await deleteAudio(oldPublicId).catch((err) => {
+          logger.warn('Failed to delete old article audio', err);
+        });
+      }
+    }
+
+    // Upload new audio to Cloudinary
+    const result = await uploadAudio(
+      req.file.buffer,
+      'wikiscrolls/audio',
+      `article-${articleId}-audio`
+    );
+
+    // Update article with new audio URL
+    const updatedArticle = await prisma.article.update({
+      where: { id: articleId },
+      data: { audioUrl: result.secure_url },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            color: true,
+          },
+        },
+      },
+    });
+
+    sendSuccess(res, 'Article audio uploaded successfully', {
+      article: updatedArticle,
+      uploadInfo: {
+        url: result.secure_url,
+        format: result.format,
+        duration: result.duration,
+      },
+    });
+  });
+
+  /**
+   * Delete article audio (admin only)
+   */
+  deleteArticleAudio = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { articleId } = req.params;
+
+    const article = await prisma.article.findUnique({
+      where: { id: articleId },
+    });
+
+    if (!article) {
+      throw new NotFoundError('Article not found');
+    }
+
+    if (!article.audioUrl) {
+      throw new BadRequestError('No article audio to delete');
+    }
+
+    // Delete from Cloudinary
+    const publicId = extractPublicId(article.audioUrl);
+    if (publicId) {
+      await deleteAudio(publicId);
+    }
+
+    // Update article to remove audio URL
+    const updatedArticle = await prisma.article.update({
+      where: { id: articleId },
+      data: { audioUrl: null },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            color: true,
+          },
+        },
+      },
+    });
+
+    sendSuccess(res, 'Article audio deleted successfully', updatedArticle);
   });
 }

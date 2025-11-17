@@ -27,6 +27,30 @@ const fileFilter = (
   cb(null, true);
 };
 
+// File filter for audio files
+const audioFileFilter = (
+  req: Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+) => {
+  // Accept audio files only
+  const allowedMimeTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg'];
+  
+  if (!allowedMimeTypes.includes(file.mimetype)) {
+    cb(new BadRequestError('Only audio files (MP3, WAV, OGG) are allowed'));
+    return;
+  }
+
+  // Check file size (10MB max for audio)
+  const maxSize = 10 * 1024 * 1024; // 10MB
+  if (file.size > maxSize) {
+    cb(new BadRequestError('Audio file size cannot exceed 10MB'));
+    return;
+  }
+
+  cb(null, true);
+};
+
 // Configure multer
 export const upload = multer({
   storage,
@@ -37,5 +61,18 @@ export const upload = multer({
   },
 });
 
+// Configure multer for audio
+export const uploadAudioConfig = multer({
+  storage,
+  fileFilter: audioFileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB max for audio
+    files: 1,
+  },
+});
+
 // Middleware for handling single image upload
 export const uploadSingle = upload.single('image');
+
+// Middleware for handling single audio upload
+export const uploadAudioSingle = uploadAudioConfig.single('audio');
