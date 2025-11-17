@@ -16,7 +16,6 @@ import userProfileRoutes from './routes/userProfile.routes';
 import interactionRoutes from './routes/interaction.routes';
 import feedRoutes from './routes/feed.routes';
 import uploadRoutes from './routes/upload.routes';
-import aiRoutes from './routes/ai.routes';
 
 // Load environment variables
 config();
@@ -48,7 +47,6 @@ app.use('/api/profiles', userProfileRoutes);
 app.use('/api/interactions', interactionRoutes);
 app.use('/api/feeds', feedRoutes);
 app.use('/api/upload', uploadRoutes);
-app.use('/api/ai', aiRoutes);
 
 // 404 handler
 app.use(notFound);

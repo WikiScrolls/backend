@@ -10,5 +10,5 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*", "generated/**/*"],
-  "exclude": ["node_modules", "frontend-examples"]
+  "exclude": ["node_modules"]
 }

@@ -6,7 +6,7 @@ import { BadRequestError } from '../utils/errors';
 const storage = multer.memoryStorage();
 
 // File filter to only accept images
-const imageFileFilter = (
+const fileFilter = (
   req: Request,
   file: Express.Multer.File,
   cb: multer.FileFilterCallback
@@ -27,67 +27,15 @@ const imageFileFilter = (
   cb(null, true);
 };
 
-// File filter to only accept audio files
-const audioFileFilter = (
-  req: Request,
-  file: Express.Multer.File,
-  cb: multer.FileFilterCallback
-) => {
-  // Accept audio only
-  const allowedMimeTypes = [
-    'audio/mpeg',
-    'audio/mp3',
-    'audio/wav',
-    'audio/wave',
-    'audio/x-wav',
-    'audio/ogg',
-    'audio/webm',
-    'audio/flac',
-    'audio/aac',
-    'audio/m4a',
-    'audio/x-m4a',
-  ];
-
-  if (!allowedMimeTypes.includes(file.mimetype)) {
-    cb(new BadRequestError('Only audio files are allowed (MP3, WAV, OGG, FLAC, AAC, M4A)'));
-    return;
-  }
-
-  // Check file size (20MB max for audio)
-  const maxSize = 20 * 1024 * 1024; // 20MB
-  if (file.size > maxSize) {
-    cb(new BadRequestError('Audio file size cannot exceed 20MB'));
-    return;
-  }
-
-  cb(null, true);
-};
-
-// Configure multer for images
-export const imageUpload = multer({
+// Configure multer
+export const upload = multer({
   storage,
-  fileFilter: imageFileFilter,
+  fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB max
     files: 1, // Only one file per request
   },
 });
 
-// Configure multer for audio
-export const audioUpload = multer({
-  storage,
-  fileFilter: audioFileFilter,
-  limits: {
-    fileSize: 20 * 1024 * 1024, // 20MB max
-    files: 1, // Only one file per request
-  },
-});
-
 // Middleware for handling single image upload
-export const uploadSingle = imageUpload.single('image');
-
-// Middleware for handling single audio upload
-export const uploadAudioSingle = audioUpload.single('audio');
-
-// Legacy export for backwards compatibility
-export const upload = imageUpload;
+export const uploadSingle = upload.single('image');

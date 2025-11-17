@@ -12,11 +12,9 @@ export interface CloudinaryUploadResult {
   secure_url: string;
   public_id: string;
   format: string;
-  width?: number;
-  height?: number;
+  width: number;
+  height: number;
   bytes: number;
-  duration?: number; // For audio/video files
-  resource_type: string;
 }
 
 /**
@@ -58,7 +56,6 @@ export const uploadImage = async (
               width: result.width,
               height: result.height,
               bytes: result.bytes,
-              resource_type: 'image',
             });
           }
         }
@@ -90,80 +87,6 @@ export const deleteImage = async (publicId: string): Promise<void> => {
     }
   } catch (error) {
     logger.error('Error deleting image from Cloudinary', error);
-    throw error;
-  }
-};
-
-/**
- * Upload an audio file to Cloudinary
- * @param file - The file buffer to upload
- * @param folder - The folder in Cloudinary to store the audio
- * @param publicId - Optional custom public ID for the audio file
- * @returns Upload result with secure_url, public_id, and duration
- */
-export const uploadAudio = async (
-  file: Buffer,
-  folder: string,
-  publicId?: string
-): Promise<CloudinaryUploadResult> => {
-  try {
-    logger.info(`Uploading audio to Cloudinary folder: ${folder}`);
-
-    return new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder,
-          public_id: publicId,
-          resource_type: 'video', // Cloudinary uses 'video' type for audio files
-          format: 'mp3', // Convert to MP3 for compatibility
-        },
-        (error, result) => {
-          if (error) {
-            logger.error('Cloudinary audio upload error', error);
-            reject(error);
-          } else if (result) {
-            logger.info(`Audio uploaded successfully: ${result.public_id}`);
-            resolve({
-              secure_url: result.secure_url,
-              public_id: result.public_id,
-              format: result.format,
-              bytes: result.bytes,
-              duration: result.duration,
-              resource_type: 'audio',
-            });
-          }
-        }
-      );
-
-      uploadStream.end(file);
-    });
-  } catch (error) {
-    logger.error('Error uploading audio to Cloudinary', error);
-    throw error;
-  }
-};
-
-/**
- * Delete an audio file from Cloudinary
- * @param publicId - The public ID of the audio to delete
- * @returns Deletion result
- */
-export const deleteAudio = async (publicId: string): Promise<void> => {
-  try {
-    logger.info(`Deleting audio from Cloudinary: ${publicId}`);
-    
-    // Audio files are stored with 'video' resource type in Cloudinary
-    const result = await cloudinary.uploader.destroy(publicId, {
-      resource_type: 'video',
-    });
-    
-    if (result.result === 'ok') {
-      logger.info(`Audio deleted successfully: ${publicId}`);
-    } else {
-      logger.warn(`Audio deletion result: ${result.result} for ${publicId}`);
-    }
-  } catch (error) {
-    logger.error('Error deleting audio from Cloudinary', error);
     throw error;
   }
 };
