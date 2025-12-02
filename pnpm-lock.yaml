@@ -50,6 +50,9 @@ importers:
       pg:
         specifier: ^8.16.3
         version: 8.16.3
+      prisma:
+        specifier: 6.18.0
+        version: 6.18.0(typescript@5.9.3)
       winston:
         specifier: ^3.18.3
         version: 3.18.3
@@ -93,9 +96,6 @@ importers:
       nodemon:
         specifier: ^3.1.10
         version: 3.1.10
-      prisma:
-        specifier: 6.18.0
-        version: 6.18.0(typescript@5.9.3)
       supertest:
         specifier: ^7.1.4
         version: 7.1.4
