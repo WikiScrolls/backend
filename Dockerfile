@@ -25,7 +25,7 @@ RUN pnpm install --frozen-lockfile
 
 # Generate Prisma Client after dependencies are installed
 # Use a dummy DATABASE_URL for build time (not used, just satisfies validation)
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma generate
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" pnpm exec prisma generate
 
 # ===== Build stage =====
 FROM base AS build
@@ -65,7 +65,8 @@ EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Start the application (with automatic database migration)
-CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node dist/index.js"]
+# Use pnpm exec to ensure we use the pinned prisma version from package.json
+CMD ["sh", "-c", "pnpm exec prisma db push --accept-data-loss && node dist/index.js"]
