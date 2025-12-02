@@ -5,7 +5,8 @@ import {
   validateUpdateUser, 
   validateGetUser, 
   validateDeleteUser,
-  validateListUsers 
+  validateListUsers,
+  validateSearchUsers
 } from '../validations/user.validation';
 import { handleValidationErrors } from '../middleware/validateRequest';
 import { authenticate, isAdmin } from '../middleware/auth';
@@ -14,7 +15,10 @@ import { createLimiter } from '../middleware/rateLimiter';
 const router = Router();
 const userController = new UserController();
 
-// All user routes require authentication and admin privileges
+// Authenticated user routes (non-admin)
+router.get('/search', authenticate, validateSearchUsers, handleValidationErrors, userController.searchUsers);
+
+// All other user routes require authentication and admin privileges
 router.use(authenticate, isAdmin);
 
 router.get('/', validateListUsers, handleValidationErrors, userController.getUsers);

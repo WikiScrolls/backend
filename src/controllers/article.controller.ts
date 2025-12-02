@@ -19,6 +19,19 @@ export class ArticleController {
     sendSuccess(res, 'Articles retrieved successfully', result);
   });
 
+  searchArticles = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const query = req.query.q as string;
+    const options = {
+      page: req.query.page ? parseInt(req.query.page as string) : 1,
+      limit: req.query.limit ? parseInt(req.query.limit as string) : 20,
+      sortBy: (req.query.sortBy as string) || 'createdAt',
+      sortOrder: (req.query.sortOrder as 'asc' | 'desc') || 'desc',
+    };
+    
+    const result = await articleService.searchArticles(query, options);
+    sendSuccess(res, 'Articles search completed', result);
+  });
+
   getArticleById = asyncHandler(async (req: AuthRequest, res: Response) => {
     const article = await articleService.getArticleById(req.params.id);
     sendSuccess(res, 'Article retrieved successfully', article);

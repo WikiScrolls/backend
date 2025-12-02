@@ -52,4 +52,44 @@ export class InteractionController {
     );
     sendSuccess(res, 'Interaction check completed', { hasInteraction });
   });
+
+  // Check all interactions (liked, saved) for an article
+  checkAllInteractions = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const result = await interactionService.checkAllInteractions(
+      req.user!.id,
+      req.params.articleId
+    );
+    sendSuccess(res, 'Interaction check completed', result);
+  });
+
+  // Get paginated list of liked articles for current user
+  getMyLikedArticles = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const page = req.query.page ? parseInt(req.query.page as string) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+    
+    const result = await interactionService.getLikedArticles(req.user!.id, page, limit);
+    sendSuccess(res, 'Liked articles retrieved successfully', result);
+  });
+
+  // Get paginated list of saved articles for current user
+  getMySavedArticles = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const page = req.query.page ? parseInt(req.query.page as string) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+    
+    const result = await interactionService.getSavedArticles(req.user!.id, page, limit);
+    sendSuccess(res, 'Saved articles retrieved successfully', result);
+  });
+
+  // Get paginated list of liked articles for a specific user (public)
+  getUserLikedArticles = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const page = req.query.page ? parseInt(req.query.page as string) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+    
+    const result = await interactionService.getPublicLikedArticles(
+      req.params.userId,
+      page,
+      limit
+    );
+    sendSuccess(res, 'User liked articles retrieved successfully', result);
+  });
 }

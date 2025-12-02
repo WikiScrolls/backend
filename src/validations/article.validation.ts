@@ -184,3 +184,37 @@ export const validateIncrementViewCount = [
     .isUUID()
     .withMessage('Article ID must be a valid UUID'),
 ];
+
+/**
+ * Validation for searching articles
+ */
+export const validateSearchArticles = [
+  query('q')
+    .notEmpty()
+    .withMessage('Search query is required')
+    .isString()
+    .withMessage('Search query must be a string')
+    .isLength({ min: 1, max: 200 })
+    .withMessage('Search query must be between 1 and 200 characters')
+    .trim(),
+  
+  query('page')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Page must be a positive integer'),
+  
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage('Limit must be between 1 and 100'),
+  
+  query('sortBy')
+    .optional()
+    .isIn(['createdAt', 'title', 'publishedDate', 'viewCount', 'likeCount'])
+    .withMessage('Sort by must be one of: createdAt, title, publishedDate, viewCount, likeCount'),
+  
+  query('sortOrder')
+    .optional()
+    .isIn(['asc', 'desc'])
+    .withMessage("Sort order must be either 'asc' or 'desc'"),
+];

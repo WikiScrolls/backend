@@ -1,6 +1,7 @@
 import prisma from '../config/database';
 import { NotFoundError } from '../utils/errors';
 import { logger } from '../config/logger';
+import { PaginationOptions } from '../types';
 
 export class UserService {
   async getAllUsers() {
@@ -16,6 +17,60 @@ export class UserService {
         profile: true,
       },
     });
+  }
+
+  /**
+   * Search users by username or displayName
+   */
+  async searchUsers(query: string, options: PaginationOptions = {}) {
+    const { page = 1, limit = 20 } = options;
+    const skip = (page - 1) * limit;
+
+    logger.info('Searching users', { query, page, limit });
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where: {
+          OR: [
+            { username: { contains: query, mode: 'insensitive' } },
+            { profile: { displayName: { contains: query, mode: 'insensitive' } } },
+          ],
+        },
+        select: {
+          id: true,
+          username: true,
+          createdAt: true,
+          profile: {
+            select: {
+              displayName: true,
+              bio: true,
+              avatarUrl: true,
+            },
+          },
+        },
+        skip,
+        take: limit,
+        orderBy: { username: 'asc' },
+      }),
+      prisma.user.count({
+        where: {
+          OR: [
+            { username: { contains: query, mode: 'insensitive' } },
+            { profile: { displayName: { contains: query, mode: 'insensitive' } } },
+          ],
+        },
+      }),
+    ]);
+
+    return {
+      users,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async getUserById(id: string) {

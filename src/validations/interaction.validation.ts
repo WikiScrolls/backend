@@ -67,3 +67,46 @@ export const validateCheckInteraction = [
     .isIn(['LIKE', 'VIEW', 'SAVE'])
     .withMessage('Type must be one of: LIKE, VIEW, SAVE'),
 ];
+
+/**
+ * Validation for checking all interactions (liked, saved) for an article
+ */
+export const validateCheckAllInteractions = [
+  param('articleId')
+    .isUUID()
+    .withMessage('Article ID must be a valid UUID'),
+];
+
+/**
+ * Validation for getting liked/saved articles with pagination
+ */
+export const validateGetInteractionArticles = [
+  query('page')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Page must be a positive integer'),
+  
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage('Limit must be between 1 and 100'),
+];
+
+/**
+ * Validation for getting another user's liked articles
+ */
+export const validateGetUserLikedArticles = [
+  param('userId')
+    .isUUID()
+    .withMessage('User ID must be a valid UUID'),
+  
+  query('page')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Page must be a positive integer'),
+  
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage('Limit must be between 1 and 100'),
+];

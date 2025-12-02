@@ -193,4 +193,152 @@ export class InteractionService {
     
     return !!interaction;
   }
+
+  /**
+   * Check all interaction states (liked, saved) for an article
+   * Returns { liked: boolean, saved: boolean }
+   */
+  async checkAllInteractions(userId: string, articleId: string) {
+    logger.info('Checking all interactions for article', { userId, articleId });
+
+    const interactions = await prisma.userInteraction.findMany({
+      where: {
+        userId,
+        articleId,
+        interactionType: { in: ['LIKE', 'SAVE'] },
+      },
+      select: {
+        interactionType: true,
+      },
+    });
+
+    const interactionTypes = interactions.map((i) => i.interactionType);
+
+    return {
+      liked: interactionTypes.includes('LIKE'),
+      saved: interactionTypes.includes('SAVE'),
+    };
+  }
+
+  /**
+   * Get paginated list of liked articles for a user
+   */
+  async getLikedArticles(userId: string, page: number = 1, limit: number = 20) {
+    logger.info('Fetching liked articles', { userId, page, limit });
+
+    const skip = (page - 1) * limit;
+
+    const [interactions, total] = await Promise.all([
+      prisma.userInteraction.findMany({
+        where: {
+          userId,
+          interactionType: 'LIKE',
+        },
+        include: {
+          article: {
+            include: {
+              category: {
+                select: {
+                  id: true,
+                  name: true,
+                  color: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take: limit,
+      }),
+      prisma.userInteraction.count({
+        where: {
+          userId,
+          interactionType: 'LIKE',
+        },
+      }),
+    ]);
+
+    return {
+      articles: interactions.map((i) => i.article),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
+   * Get paginated list of saved articles for a user
+   */
+  async getSavedArticles(userId: string, page: number = 1, limit: number = 20) {
+    logger.info('Fetching saved articles', { userId, page, limit });
+
+    const skip = (page - 1) * limit;
+
+    const [interactions, total] = await Promise.all([
+      prisma.userInteraction.findMany({
+        where: {
+          userId,
+          interactionType: 'SAVE',
+        },
+        include: {
+          article: {
+            include: {
+              category: {
+                select: {
+                  id: true,
+                  name: true,
+                  color: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take: limit,
+      }),
+      prisma.userInteraction.count({
+        where: {
+          userId,
+          interactionType: 'SAVE',
+        },
+      }),
+    ]);
+
+    return {
+      articles: interactions.map((i) => i.article),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
+   * Get public liked articles for a user (for viewing another user's likes)
+   */
+  async getPublicLikedArticles(userId: string, page: number = 1, limit: number = 20) {
+    logger.info('Fetching public liked articles', { userId, page, limit });
+
+    // Verify user exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    return this.getLikedArticles(userId, page, limit);
+  }
 }

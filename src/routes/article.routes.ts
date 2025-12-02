@@ -6,7 +6,8 @@ import {
   validateGetArticle, 
   validateDeleteArticle,
   validateListArticles,
-  validateIncrementViewCount
+  validateIncrementViewCount,
+  validateSearchArticles
 } from '../validations/article.validation';
 import { handleValidationErrors } from '../middleware/validateRequest';
 import { authenticate, isAdmin } from '../middleware/auth';
@@ -16,6 +17,7 @@ const router = Router();
 const articleController = new ArticleController();
 
 // Public/authenticated user routes
+router.get('/search', authenticate, validateSearchArticles, handleValidationErrors, articleController.searchArticles);
 router.get('/', authenticate, validateListArticles, handleValidationErrors, articleController.getArticles);
 router.get('/:id', authenticate, validateGetArticle, handleValidationErrors, articleController.getArticleById);
 router.post('/:id/view', authenticate, validateIncrementViewCount, handleValidationErrors, articleController.incrementViewCount);

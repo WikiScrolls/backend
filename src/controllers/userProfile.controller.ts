@@ -24,6 +24,13 @@ export class UserProfileController {
     sendSuccess(res, 'Profile retrieved successfully', profile);
   });
 
+  // Get public profile by user ID (no ownership required)
+  getPublicProfile = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { userId } = req.params;
+    const profile = await userProfileService.getPublicProfile(userId);
+    sendSuccess(res, 'Profile retrieved successfully', profile);
+  });
+
   // Get current user's profile
   getMyProfile = asyncHandler(async (req: AuthRequest, res: Response) => {
     const profile = await userProfileService.getProfileByUserId(
@@ -32,6 +39,12 @@ export class UserProfileController {
       req.user!.isAdmin
     );
     sendSuccess(res, 'Profile retrieved successfully', profile);
+  });
+
+  // Get current user's stats
+  getMyStats = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const stats = await userProfileService.getMyStats(req.user!.id);
+    sendSuccess(res, 'Stats retrieved successfully', stats);
   });
 
   // Create profile

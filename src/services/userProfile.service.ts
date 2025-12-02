@@ -32,6 +32,89 @@ export class UserProfileService {
     return profile;
   }
 
+  /**
+   * Get public profile for any user (does not require ownership)
+   */
+  async getPublicProfile(userId: string) {
+    logger.info(`Fetching public profile for user: ${userId}`);
+    
+    const profile = await prisma.userProfile.findUnique({ 
+      where: { userId },
+      select: {
+        id: true,
+        displayName: true,
+        bio: true,
+        avatarUrl: true,
+        interests: true,
+        updatedAt: true,
+        user: {
+          select: {
+            id: true,
+            username: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+    
+    if (!profile) {
+      throw new NotFoundError(`Profile for user ${userId} not found`);
+    }
+    
+    return profile;
+  }
+
+  /**
+   * Get stats for the current user
+   */
+  async getMyStats(userId: string) {
+    logger.info(`Fetching stats for user: ${userId}`);
+    
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        username: true,
+        createdAt: true,
+      },
+    });
+    
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+    
+    // Get interaction counts
+    const [likeCount, saveCount, viewCount] = await Promise.all([
+      prisma.userInteraction.count({
+        where: {
+          userId,
+          interactionType: 'LIKE',
+        },
+      }),
+      prisma.userInteraction.count({
+        where: {
+          userId,
+          interactionType: 'SAVE',
+        },
+      }),
+      prisma.userInteraction.count({
+        where: {
+          userId,
+          interactionType: 'VIEW',
+        },
+      }),
+    ]);
+    
+    return {
+      userId: user.id,
+      username: user.username,
+      joinDate: user.createdAt,
+      totalLikes: likeCount,
+      totalSaves: saveCount,
+      totalViews: viewCount,
+    };
+  }
+
   async getAllProfiles() {
     logger.info('Fetching all user profiles');
     return await prisma.userProfile.findMany({

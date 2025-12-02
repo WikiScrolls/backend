@@ -19,9 +19,13 @@ router.use(authenticate);
 
 // User routes - manage own profile
 router.get('/me', userProfileController.getMyProfile);
+router.get('/me/stats', userProfileController.getMyStats);
 router.post('/me', createLimiter, validateCreateProfile, handleValidationErrors, userProfileController.createProfile);
 router.put('/me', validateUpdateProfile, handleValidationErrors, userProfileController.updateMyProfile);
 router.delete('/me', userProfileController.deleteMyProfile);
+
+// Public profile view (any authenticated user can view another user's public profile)
+router.get('/public/:userId', validateGetProfileByUserId, handleValidationErrors, userProfileController.getPublicProfile);
 
 // Admin routes - manage any profile
 router.get('/', isAdmin, userProfileController.getAllProfiles);

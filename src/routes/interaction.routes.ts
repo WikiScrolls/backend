@@ -5,7 +5,10 @@ import {
   validateDeleteInteraction,
   validateGetUserInteractions,
   validateGetArticleInteractions,
-  validateCheckInteraction
+  validateCheckInteraction,
+  validateCheckAllInteractions,
+  validateGetInteractionArticles,
+  validateGetUserLikedArticles
 } from '../validations/interaction.validation';
 import { handleValidationErrors } from '../middleware/validateRequest';
 import { authenticate, isAdmin } from '../middleware/auth';
@@ -20,7 +23,14 @@ router.use(authenticate);
 router.post('/', validateCreateInteraction, handleValidationErrors, interactionController.createInteraction);
 router.delete('/', validateDeleteInteraction, handleValidationErrors, interactionController.deleteInteraction);
 router.get('/me', validateGetUserInteractions, handleValidationErrors, interactionController.getMyInteractions);
-router.get('/check/:articleId', validateCheckInteraction, handleValidationErrors, interactionController.checkInteraction);
+router.get('/me/liked', validateGetInteractionArticles, handleValidationErrors, interactionController.getMyLikedArticles);
+router.get('/me/saved', validateGetInteractionArticles, handleValidationErrors, interactionController.getMySavedArticles);
+
+// Check interactions for an article
+router.get('/check/:articleId', validateCheckAllInteractions, handleValidationErrors, interactionController.checkAllInteractions);
+
+// View another user's public liked articles
+router.get('/users/:userId/liked', validateGetUserLikedArticles, handleValidationErrors, interactionController.getUserLikedArticles);
 
 // Admin routes - view article interactions
 router.get('/article/:articleId', isAdmin, validateGetArticleInteractions, handleValidationErrors, interactionController.getArticleInteractions);

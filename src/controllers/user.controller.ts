@@ -12,6 +12,17 @@ export class UserController {
     sendSuccess(res, 'Users retrieved successfully', users);
   });
 
+  searchUsers = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const query = req.query.q as string;
+    const options = {
+      page: req.query.page ? parseInt(req.query.page as string) : 1,
+      limit: req.query.limit ? parseInt(req.query.limit as string) : 20,
+    };
+    
+    const result = await userService.searchUsers(query, options);
+    sendSuccess(res, 'Users search completed', result);
+  });
+
   getUserById = asyncHandler(async (req: AuthRequest, res: Response) => {
     const user = await userService.getUserById(req.params.id);
     sendSuccess(res, 'User retrieved successfully', user);
