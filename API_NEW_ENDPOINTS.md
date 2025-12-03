@@ -470,8 +470,10 @@ interface Article {
   id: string;
   title: string;
   wikipediaUrl: string;
+  wikipediaId: string | null;  // Wikipedia Page ID
   imageUrl: string | null;
-  aiSummary: string;
+  content: string | null;      // Raw Wikipedia content
+  aiSummary: string | null;    // AI-generated summary
   audioUrl: string | null;
   tags: string[];
   publishedDate: string; // ISO date
@@ -481,12 +483,12 @@ interface Article {
   viewCount: number;
   likeCount: number;
   saveCount: number;
-  categoryId: string;
+  categoryId: string | null;
   category: {
     id: string;
     name: string;
     color: string | null;
-  };
+  } | null;
 }
 
 // User search result
@@ -501,3 +503,209 @@ interface UserSearchResult {
   } | null;
 }
 ```
+
+---
+
+## 4. PageRank Integration (Admin/Service-to-Service)
+
+These endpoints are used by the PageRank service to sync Wikipedia articles with the backend database.
+
+> **Note:** These endpoints require admin authentication.
+
+### Upsert Single Article
+
+Creates a new article or returns existing article if it already exists (matched by `wikipediaId` or `wikipediaUrl`).
+
+```
+POST /api/articles/upsert
+```
+
+**Request Body:**
+```json
+{
+  "id": "12345",           // Wikipedia Page ID (maps to wikipediaId)
+  "title": "Quantum Physics",
+  "wikipediaUrl": "https://en.wikipedia.org/wiki/Quantum_physics",
+  "content": "Quantum physics is the branch of physics...",
+  "thumbnail": "https://upload.wikimedia.org/..."
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | ✅ | Wikipedia Page ID |
+| `title` | string | ✅ | Article title |
+| `wikipediaUrl` | string | ✅ | Full Wikipedia URL |
+| `content` | string | ❌ | Wikipedia extract/intro text |
+| `thumbnail` | string | ❌ | Wikipedia thumbnail image URL |
+
+**Response (Created - 201):**
+```json
+{
+  "success": true,
+  "message": "Article created successfully",
+  "data": {
+    "article": {
+      "id": "uuid",
+      "wikipediaId": "12345",
+      "title": "Quantum Physics",
+      "wikipediaUrl": "https://...",
+      "content": "...",
+      "imageUrl": "https://...",
+      "isProcessed": false,
+      ...
+    },
+    "created": true
+  }
+}
+```
+
+**Response (Already Exists - 200):**
+```json
+{
+  "success": true,
+  "message": "Article already exists",
+  "data": {
+    "article": { ... },
+    "created": false
+  }
+}
+```
+
+---
+
+### Batch Upsert Articles
+
+Bulk upsert multiple articles at once.
+
+```
+POST /api/articles/upsert-batch
+```
+
+**Request Body:**
+```json
+{
+  "articles": [
+    {
+      "id": "12345",
+      "title": "Quantum Physics",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Quantum_physics",
+      "content": "...",
+      "thumbnail": "https://..."
+    },
+    {
+      "id": "67890",
+      "title": "General Relativity",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/General_relativity",
+      "content": "...",
+      "thumbnail": "https://..."
+    }
+  ]
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `articles` | array | ✅ | Array of 1-100 articles |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Bulk upsert completed",
+  "data": {
+    "created": 1,
+    "existing": 1,
+    "articles": [
+      { ... },
+      { ... }
+    ]
+  }
+}
+```
+
+---
+
+### Get Article by Wikipedia ID
+
+Retrieve an article by its Wikipedia Page ID.
+
+```
+GET /api/articles/wikipedia/:wikipediaId
+```
+
+**Path Parameters:**
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `wikipediaId` | string | Wikipedia Page ID |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Article retrieved successfully",
+  "data": {
+    "id": "uuid",
+    "wikipediaId": "12345",
+    "title": "Quantum Physics",
+    ...
+  }
+}
+```
+
+**Error (404):**
+```json
+{
+  "success": true,
+  "message": "Article not found",
+  "data": null
+}
+```
+
+---
+
+### Get Article by Wikipedia URL
+
+Retrieve an article by its Wikipedia URL.
+
+```
+GET /api/articles/wikipedia/url?url=<wikipedia_url>
+```
+
+**Query Parameters:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `url` | string | ✅ | Full Wikipedia URL (URL-encoded) |
+
+**Example:**
+```
+GET /api/articles/wikipedia/url?url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FQuantum_physics
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Article retrieved successfully",
+  "data": {
+    "id": "uuid",
+    "wikipediaId": "12345",
+    "title": "Quantum Physics",
+    ...
+  }
+}
+```
+
+---
+
+## Environment Variables
+
+For Gorse integration, add these environment variables:
+
+```env
+# Gorse Recommendation Engine
+GORSE_URL=http://localhost:8087
+GORSE_API_KEY=your-api-key-here
+```
+
+When configured, user interactions (likes, saves, views) will be automatically synced to Gorse for personalized recommendations.

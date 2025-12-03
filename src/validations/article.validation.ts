@@ -21,10 +21,15 @@ export const validateCreateArticle = [
     .trim(),
   
   body('aiSummary')
-    .notEmpty()
-    .withMessage('AI summary is required')
+    .optional()
     .isString()
     .withMessage('AI summary must be a string')
+    .trim(),
+  
+  body('content')
+    .optional()
+    .isString()
+    .withMessage('Content must be a string')
     .trim(),
   
   body('audioUrl')
@@ -51,14 +56,12 @@ export const validateCreateArticle = [
     .trim(),
   
   body('publishedDate')
-    .notEmpty()
-    .withMessage('Published date is required')
+    .optional()
     .isISO8601()
     .withMessage('Published date must be a valid ISO 8601 date'),
   
   body('categoryId')
-    .notEmpty()
-    .withMessage('Category ID is required')
+    .optional()
     .isUUID()
     .withMessage('Category ID must be a valid UUID'),
 ];
@@ -217,4 +220,153 @@ export const validateSearchArticles = [
     .optional()
     .isIn(['asc', 'desc'])
     .withMessage("Sort order must be either 'asc' or 'desc'"),
+];
+
+/**
+ * Validation for upserting an article (PageRank integration)
+ */
+export const validateUpsertArticle = [
+  body('title')
+    .notEmpty()
+    .withMessage('Title is required')
+    .isString()
+    .withMessage('Title must be a string')
+    .isLength({ min: 1, max: 500 })
+    .withMessage('Title must be between 1 and 500 characters')
+    .trim(),
+  
+  body('wikipediaUrl')
+    .notEmpty()
+    .withMessage('Wikipedia URL is required')
+    .isURL()
+    .withMessage('Must be a valid URL')
+    .trim(),
+  
+  body('wikipediaId')
+    .optional()
+    .isString()
+    .withMessage('Wikipedia ID must be a string')
+    .trim(),
+  
+  body('aiSummary')
+    .optional()
+    .isString()
+    .withMessage('AI summary must be a string')
+    .trim(),
+  
+  body('content')
+    .optional()
+    .isString()
+    .withMessage('Content must be a string')
+    .trim(),
+  
+  body('audioUrl')
+    .optional()
+    .isURL()
+    .withMessage('Audio URL must be a valid URL')
+    .trim(),
+  
+  body('imageUrl')
+    .optional()
+    .isURL()
+    .withMessage('Image URL must be a valid URL')
+    .trim(),
+  
+  body('tags')
+    .optional()
+    .isArray()
+    .withMessage('Tags must be an array'),
+  
+  body('tags.*')
+    .optional()
+    .isString()
+    .withMessage('Each tag must be a string')
+    .trim(),
+  
+  body('publishedDate')
+    .optional()
+    .isISO8601()
+    .withMessage('Published date must be a valid ISO 8601 date'),
+  
+  body('categoryId')
+    .optional()
+    .isUUID()
+    .withMessage('Category ID must be a valid UUID'),
+];
+
+/**
+ * Validation for batch upserting articles (PageRank integration)
+ */
+export const validateUpsertBatch = [
+  body('articles')
+    .isArray({ min: 1, max: 100 })
+    .withMessage('Articles must be an array with 1-100 items'),
+  
+  body('articles.*.title')
+    .notEmpty()
+    .withMessage('Each article must have a title')
+    .isString()
+    .withMessage('Title must be a string')
+    .isLength({ min: 1, max: 500 })
+    .withMessage('Title must be between 1 and 500 characters')
+    .trim(),
+  
+  body('articles.*.wikipediaUrl')
+    .notEmpty()
+    .withMessage('Each article must have a Wikipedia URL')
+    .isURL()
+    .withMessage('Must be a valid URL')
+    .trim(),
+  
+  body('articles.*.wikipediaId')
+    .optional()
+    .isString()
+    .withMessage('Wikipedia ID must be a string')
+    .trim(),
+  
+  body('articles.*.aiSummary')
+    .optional()
+    .isString()
+    .withMessage('AI summary must be a string')
+    .trim(),
+  
+  body('articles.*.content')
+    .optional()
+    .isString()
+    .withMessage('Content must be a string')
+    .trim(),
+  
+  body('articles.*.imageUrl')
+    .optional()
+    .isURL()
+    .withMessage('Image URL must be a valid URL')
+    .trim(),
+  
+  body('articles.*.tags')
+    .optional()
+    .isArray()
+    .withMessage('Tags must be an array'),
+];
+
+/**
+ * Validation for getting article by Wikipedia ID
+ */
+export const validateGetByWikipediaId = [
+  param('wikipediaId')
+    .notEmpty()
+    .withMessage('Wikipedia ID is required')
+    .isString()
+    .withMessage('Wikipedia ID must be a string'),
+];
+
+/**
+ * Validation for getting article by Wikipedia URL
+ */
+export const validateGetByWikipediaUrl = [
+  query('url')
+    .notEmpty()
+    .withMessage('Wikipedia URL is required')
+    .isURL()
+    .withMessage('Must be a valid URL')
+    .trim(),
 ];

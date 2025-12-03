@@ -7,7 +7,11 @@ import {
   validateDeleteArticle,
   validateListArticles,
   validateIncrementViewCount,
-  validateSearchArticles
+  validateSearchArticles,
+  validateUpsertArticle,
+  validateUpsertBatch,
+  validateGetByWikipediaId,
+  validateGetByWikipediaUrl
 } from '../validations/article.validation';
 import { handleValidationErrors } from '../middleware/validateRequest';
 import { authenticate, isAdmin } from '../middleware/auth';
@@ -18,9 +22,15 @@ const articleController = new ArticleController();
 
 // Public/authenticated user routes
 router.get('/search', authenticate, validateSearchArticles, handleValidationErrors, articleController.searchArticles);
+router.get('/wikipedia/url', authenticate, validateGetByWikipediaUrl, handleValidationErrors, articleController.getByWikipediaUrl);
+router.get('/wikipedia/:wikipediaId', authenticate, validateGetByWikipediaId, handleValidationErrors, articleController.getByWikipediaId);
 router.get('/', authenticate, validateListArticles, handleValidationErrors, articleController.getArticles);
 router.get('/:id', authenticate, validateGetArticle, handleValidationErrors, articleController.getArticleById);
 router.post('/:id/view', authenticate, validateIncrementViewCount, handleValidationErrors, articleController.incrementViewCount);
+
+// PageRank integration routes (service-to-service, protected by API key or admin)
+router.post('/upsert', authenticate, isAdmin, validateUpsertArticle, handleValidationErrors, articleController.upsertArticle);
+router.post('/upsert-batch', authenticate, isAdmin, validateUpsertBatch, handleValidationErrors, articleController.upsertBatch);
 
 // Admin-only routes
 router.post('/', authenticate, isAdmin, createLimiter, validateCreateArticle, handleValidationErrors, articleController.createArticle);

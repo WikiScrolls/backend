@@ -2,11 +2,13 @@ import prisma from '../config/database';
 import { NotFoundError, BadRequestError } from '../utils/errors';
 import { logger } from '../config/logger';
 import { InteractionType } from '../types';
+import { gorseService } from './gorse.service';
 
 export class InteractionService {
   /**
    * Create a new interaction (LIKE, VIEW, SAVE)
    * Automatically updates denormalized counts on Article
+   * Syncs to Gorse for recommendations
    */
   async createInteraction(data: {
     userId: string;
@@ -15,9 +17,10 @@ export class InteractionService {
   }) {
     logger.info('Creating interaction', data);
     
-    // Verify article exists
+    // Verify article exists and get Wikipedia ID for Gorse sync
     const article = await prisma.article.findUnique({
       where: { id: data.articleId },
+      select: { id: true, wikipediaId: true },
     });
     
     if (!article) {
@@ -65,7 +68,24 @@ export class InteractionService {
       }),
     ]);
     
+    // Sync to Gorse for recommendations (fire and forget)
+    this.syncToGorse(data.userId, article.wikipediaId || data.articleId, data.interactionType);
+    
     return interaction;
+  }
+
+  /**
+   * Sync interaction to Gorse recommendation engine
+   * Fire and forget - doesn't block the main operation
+   */
+  private async syncToGorse(userId: string, itemId: string, feedbackType: InteractionType) {
+    try {
+      await gorseService.insertFeedback(userId, itemId, feedbackType);
+      logger.info('Synced interaction to Gorse', { userId, itemId, feedbackType });
+    } catch (error) {
+      // Log but don't fail the main operation
+      logger.error('Failed to sync to Gorse', { userId, itemId, feedbackType, error });
+    }
   }
 
   /**

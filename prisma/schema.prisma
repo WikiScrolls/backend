@@ -57,16 +57,18 @@ model UserProfile {
 // Represents a single Wikipedia article, processed by your AI.
 model Article {
   id            String   @id @default(uuid()) @db.Uuid
+  wikipediaId   String?  @unique // Wikipedia Page ID for integration with PageRank
   title         String
   wikipediaUrl  String   @unique // Ensures you don't process the same article twice
-  imageUrl      String? // Article thumbnail/cover image from Cloudinary
-  aiSummary     String   @db.Text // Use Text for potentially long summaries
+  imageUrl      String? // Article thumbnail/cover image
+  content       String?  @db.Text // Raw content/extract from Wikipedia
+  aiSummary     String?  @db.Text // AI-generated summary (optional, processed later)
   audioUrl      String?
   tags          String[]
-  publishedDate DateTime // The original article's publish date
+  publishedDate DateTime @default(now()) // The original article's publish date
   createdAt     DateTime @default(now())
   isActive      Boolean  @default(true)
-  isProcessed   Boolean  @default(false) // Flag for your processing queue
+  isProcessed   Boolean  @default(false) // Flag for AI processing queue
 
   // Denormalized counts for fast read access, as seen in your UML
   viewCount Int @default(0)
@@ -74,13 +76,14 @@ model Article {
   saveCount Int @default(0) // Added 'save' to match the SAVE InteractionType
 
   // --- Relations ---
-  categoryId String   @db.Uuid
-  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String?  @db.Uuid // Made optional for Wikipedia articles
+  category   Category? @relation(fields: [categoryId], references: [id])
 
   // One-to-many relation with all interactions on this article
   interactions UserInteraction[]
 
   @@index([categoryId])
+  @@index([wikipediaId])
   @@index([isActive, isProcessed]) // For quickly finding articles to process or display
 }
 
