@@ -27,7 +27,7 @@ router.get('/wikipedia/:wikipediaId', authenticate, validateGetByWikipediaId, ha
 router.get('/', authenticate, validateListArticles, handleValidationErrors, articleController.getArticles);
 router.get('/:id', authenticate, validateGetArticle, handleValidationErrors, articleController.getArticleById);
 router.post('/:id/view', authenticate, validateIncrementViewCount, handleValidationErrors, articleController.incrementViewCount);
-
+// bro
 // PageRank integration routes (accessible by authenticated users for FE integration)
 router.post('/upsert', authenticate, validateUpsertArticle, handleValidationErrors, articleController.upsertArticle);
 router.post('/upsert-batch', authenticate, validateUpsertBatch, handleValidationErrors, articleController.upsertBatch);
