@@ -28,9 +28,9 @@ router.get('/', authenticate, validateListArticles, handleValidationErrors, arti
 router.get('/:id', authenticate, validateGetArticle, handleValidationErrors, articleController.getArticleById);
 router.post('/:id/view', authenticate, validateIncrementViewCount, handleValidationErrors, articleController.incrementViewCount);
 
-// PageRank integration routes (service-to-service, protected by API key or admin)
-router.post('/upsert', authenticate, isAdmin, validateUpsertArticle, handleValidationErrors, articleController.upsertArticle);
-router.post('/upsert-batch', authenticate, isAdmin, validateUpsertBatch, handleValidationErrors, articleController.upsertBatch);
+// PageRank integration routes (accessible by authenticated users for FE integration)
+router.post('/upsert', authenticate, validateUpsertArticle, handleValidationErrors, articleController.upsertArticle);
+router.post('/upsert-batch', authenticate, validateUpsertBatch, handleValidationErrors, articleController.upsertBatch);
 
 // Admin-only routes
 router.post('/', authenticate, isAdmin, createLimiter, validateCreateArticle, handleValidationErrors, articleController.createArticle);

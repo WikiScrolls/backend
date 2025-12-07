@@ -506,11 +506,11 @@ interface UserSearchResult {
 
 ---
 
-## 4. PageRank Integration (Admin/Service-to-Service)
+## 4. PageRank Integration (Frontend/Service)
 
-These endpoints are used by the PageRank service to sync Wikipedia articles with the backend database.
+These endpoints are used to sync Wikipedia articles with the backend database, typically when the frontend receives recommendations from the PageRank service.
 
-> **Note:** These endpoints require admin authentication.
+> **Note:** These endpoints require authentication (any signed-in user).
 
 ### Upsert Single Article
 
