@@ -69,4 +69,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 # Start the application (with automatic database migration)
 # Use pnpm exec to ensure we use the pinned prisma version from package.json
-CMD ["sh", "-c", "pnpm exec prisma db push --accept-data-loss && node dist/index.js"]
+CMD ["sh", "-c", "./node_modules/.bin/prisma db push --accept-data-loss && node dist/index.js"]
