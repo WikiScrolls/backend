@@ -226,7 +226,7 @@ export class UploadController {
       throw new BadRequestError('No audio file provided');
     }
 
-    const { articleId } = req.params;
+    const articleId = req.params.articleId || req.params.id;
 
     // Check if article exists
     const article = await prisma.article.findUnique({

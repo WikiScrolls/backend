@@ -698,6 +698,61 @@ GET /api/articles/wikipedia/url?url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FQuan
 
 ---
 
+### Update Article (Partial)
+
+Update article details (e.g., AI summary, audio URL).
+
+```
+PATCH /api/articles/:id
+```
+
+**Request Body:**
+```json
+{
+  "aiSummary": "New summary...",
+  "audioUrl": "https://..."
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Article updated successfully",
+  "data": { ... }
+}
+```
+
+### Upload Article Audio
+
+Upload an audio file for an article.
+
+```
+POST /api/articles/:id/audio
+```
+
+**Request:**
+- Content-Type: `multipart/form-data`
+- Field: `audio` (file)
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Article audio uploaded successfully",
+  "data": {
+    "article": { ... },
+    "uploadInfo": {
+      "url": "https://...",
+      "format": "mp3",
+      "duration": 123.45
+    }
+  }
+}
+```
+
+---
+
 ## Environment Variables
 
 For Gorse integration, add these environment variables:
