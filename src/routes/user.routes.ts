@@ -17,12 +17,11 @@ const userController = new UserController();
 
 // Authenticated user routes (non-admin)
 router.get('/search', authenticate, validateSearchUsers, handleValidationErrors, userController.searchUsers);
+router.get('/', authenticate, validateListUsers, handleValidationErrors, userController.getUsers);
+router.get('/:id', authenticate, validateGetUser, handleValidationErrors, userController.getUserById);
 
-// All other user routes require authentication and admin privileges
+// Admin-only routes
 router.use(authenticate, isAdmin);
-
-router.get('/', validateListUsers, handleValidationErrors, userController.getUsers);
-router.get('/:id', validateGetUser, handleValidationErrors, userController.getUserById);
 router.post('/', createLimiter, validateCreateUser, handleValidationErrors, userController.createUser);
 router.put('/:id', validateUpdateUser, handleValidationErrors, userController.updateUser);
 router.delete('/:id', validateDeleteUser, handleValidationErrors, userController.deleteUser);
